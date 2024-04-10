@@ -38,6 +38,6 @@ runs:
           PATCH_NUMBER=$(echo $GREP_MATCH | sed -E 's/^.+ Published Patch (.*)\!$/\1/')
           echo "patch-number=$(echo $PATCH_NUMBER)" >> $GITHUB_OUTPUT
         else
-          echo "Failed to create release"
+          echo "Failed to create patch"
           exit 1
         fi
