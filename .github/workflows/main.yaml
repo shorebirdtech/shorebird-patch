@@ -57,29 +57,33 @@ jobs:
         run: echo $env:E2E_TEST_SHOREBIRD_YAML > shorebird.yaml
         working-directory: e2e_test
 
-      - name: Show Shorebird YAML
-        run: cat shorebird.yaml
-        working-directory: e2e_test
-
       - name: 🐦 Shorebird Patch pubspec.yaml
         run: |
           echo "  assets:" >> pubspec.yaml
           echo "    - shorebird.yaml" >> pubspec.yaml
         working-directory: e2e_test
 
-      - name: Show Shorebird YAML AGAIN
-        run: cat shorebird.yaml
-        working-directory: e2e_test
-
       - name: 🐦 Shorebird Doctor
         run: shorebird doctor --fix
         working-directory: e2e_test
 
-      - name: 🐦 Shorebird Patch
+      - name: 🐦 Shorebird Patch (MacOS/Linux)
+        if: runner.os != 'Windows'
         uses: ./
         id: shorebird-patch
         with:
           args: --verbose
+          platform: android
+          working-directory: e2e_test
+
+      - name: 🐦 Shorebird Patch (Windows)
+        if: runner.os == 'Windows'
+        uses: ./
+        id: shorebird-patch
+        with:
+          # We only need allow-asset-diffs on Windows because the release were generated on a
+          # macOS machine, so ignoring asset diffs for now.
+          args: --verbose --allow-asset-diffs
           platform: android
           working-directory: e2e_test
 
