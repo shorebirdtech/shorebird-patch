@@ -70,7 +70,7 @@ jobs:
       - name: 🐦 Shorebird Patch (MacOS/Linux)
         if: runner.os != 'Windows'
         uses: ./
-        id: shorebird-patch
+        id: shorebird-patch-unix
         with:
           args: --verbose
           platform: android
@@ -79,7 +79,7 @@ jobs:
       - name: 🐦 Shorebird Patch (Windows)
         if: runner.os == 'Windows'
         uses: ./
-        id: shorebird-patch
+        id: shorebird-patch-windows
         with:
           # We only need allow-asset-diffs on Windows because the release were generated on a
           # macOS machine, so ignoring asset diffs for now.
@@ -93,7 +93,7 @@ jobs:
       - name: 🚦 Assert Patch Number (MacOS/Linux)
         if: runner.os != 'Windows'
         run: |
-          if [[ ${{ steps.shorebird-patch.outputs.patch-number }} =~ ^-?[0-9]+$ ]]; then
+          if [[ ${{ steps.shorebird-patch-unix.outputs.patch-number }} =~ ^-?[0-9]+$ ]]; then
             echo '✅ Shorebird Patch Succeeded!'
           else
             echo '❌ Shorebird Patch Failed.'
@@ -103,7 +103,7 @@ jobs:
       - name: 🚦 Assert Patch Version (Windows)
         if: runner.os == 'Windows'
         run: |
-          if ("${{ steps.shorebird-patch.outputs.patch-number }}" -match "^[0-9]+$") {
+          if ("${{ steps.shorebird-patch-windows.outputs.patch-number }}" -match "^[0-9]+$") {
             Write-Output "✅ Shorebird Patch Succeeded!"
           } else {
             Write-Output "❌ Shorebird Patch Failed."
