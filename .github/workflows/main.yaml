@@ -47,8 +47,14 @@ jobs:
       - name: ✨ Create New Flutter Project
         run: flutter create e2e_test --empty
 
-      - name: 🐦 Shorebird Init
+      - name: 🐦 Shorebird Init (MacOS/Linux)
+        if: runner.os != 'Windows'
         run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
+        working-directory: e2e_test
+
+      - name: 🐦 Shorebird Init (Windows)
+        if: runner.os == 'Windows'
+        run: echo $env:E2E_TEST_SHOREBIRD_YAML > shorebird.yaml
         working-directory: e2e_test
 
       - name: Show Shorebird YAML
