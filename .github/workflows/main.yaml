@@ -72,7 +72,7 @@ jobs:
       - name: 🚦 Assert Patch Number (MacOS/Linux)
         if: runner.os != 'Windows'
         run: |
-          if [[ ${{ steps.shorebird-patch.outputs.patch-number }} =~ "0.1.0+1" ]]; then
+          if [[ ${{ steps.shorebird-patch.outputs.patch-number }} =~ "^[0-9]+$" ]]; then
             echo '✅ Shorebird Patch Succeeded!'
           else
             echo '❌ Shorebird Patch Failed.'
@@ -82,7 +82,7 @@ jobs:
       - name: 🚦 Assert Patch Version (Windows)
         if: runner.os == 'Windows'
         run: |
-          if ("${{ steps.shorebird-patch.outputs.patch-number }}" -match "0.1.0\+1") {
+          if ("${{ steps.shorebird-patch.outputs.patch-number }}" -match "^[0-9]+$") {
             Write-Output "✅ Shorebird Patch Succeeded!"
           } else {
             Write-Output "❌ Shorebird Patch Failed."
