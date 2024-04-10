@@ -70,7 +70,7 @@ jobs:
           working-directory: e2e_test
 
       - name: Print Patch Number
-        run: echo "The Patch Number is: ${{ steps.shorebird-patch.outputs.patch-number }}"
+        run: echo ${{ steps.shorebird-patch.outputs.patch-number }}
 
       - name: 🚦 Assert Patch Number (MacOS/Linux)
         if: runner.os != 'Windows'
