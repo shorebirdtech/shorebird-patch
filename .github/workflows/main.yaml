@@ -51,10 +51,18 @@ jobs:
         run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
         working-directory: e2e_test
 
+      - name: Show Shorebird YAML
+        run: cat shorebird.yaml
+        working-directory: e2e_test
+
       - name: 🐦 Shorebird Patch pubspec.yaml
         run: |
           echo "  assets:" >> pubspec.yaml
           echo "    - shorebird.yaml" >> pubspec.yaml
+        working-directory: e2e_test
+
+      - name: Show Shorebird YAML AGAIN
+        run: cat shorebird.yaml
         working-directory: e2e_test
 
       - name: 🐦 Shorebird Doctor
