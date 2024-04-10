@@ -87,9 +87,6 @@ jobs:
           platform: android
           working-directory: e2e_test
 
-      - name: Print Patch Number
-        run: echo ${{ steps.shorebird-patch.outputs.patch-number }}
-
       - name: 🚦 Assert Patch Number (MacOS/Linux)
         if: runner.os != 'Windows'
         run: |
