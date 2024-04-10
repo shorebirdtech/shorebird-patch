@@ -50,6 +50,9 @@ jobs:
       - name: 🐦 Shorebird Init
         run: echo "$E2E_TEST_SHOREBIRD_YAML" > e2e_test/shorebird.yaml
 
+      - name: 🐦 Shorebird Check YAML
+        run: cat e2e_test/shorebird.yaml
+
       - name: 🐦 Shorebird Patch
         uses: ./
         id: shorebird-patch
