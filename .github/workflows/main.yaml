@@ -49,7 +49,8 @@ jobs:
 
       - name: 🐦 Shorebird Init
         run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
-        working-directory: e2e_test
+        with:
+          working-directory: e2e_test
 
       - name: 🐦 Shorebird Patch
         uses: ./
