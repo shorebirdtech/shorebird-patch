@@ -48,13 +48,15 @@ jobs:
         run: flutter create e2e_test --empty
 
       - name: 🐦 Shorebird Init
-        run: shorebird init --force
-        working-directory: e2e_test
+        run: echo "$E2E_TEST_SHOREBIRD_YAML" > e2e_test/shorebird.yaml
 
-        # We need a release before doing a patch
-      - name: 🐦 Shorebird Release
-        run: shorebird release android --verbose
-        working-directory: e2e_test
+      - name: 🐦 Shorebird Patch pubspec.yaml
+        run: |
+          echo "  assets:" >> e2e_test/pubspec.yaml
+          echo "    - shorebird.yaml" >> e2e_test/pubspec.yaml
+
+      - name: 🐦 Shorebird Doctor
+        run: shorebird doctor --fix
 
       - name: 🐦 Shorebird Patch
         uses: ./
