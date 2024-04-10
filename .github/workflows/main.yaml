@@ -48,9 +48,7 @@ jobs:
         run: flutter create e2e_test --empty
 
       - name: 🐦 Shorebird Init
-        run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
-        with:
-          working-directory: e2e_test
+        run: echo "$E2E_TEST_SHOREBIRD_YAML" > e2e_test/shorebird.yaml
 
       - name: 🐦 Shorebird Patch
         uses: ./
