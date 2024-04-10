@@ -47,9 +47,14 @@ jobs:
       - name: ✨ Create New Flutter Project
         run: flutter create e2e_test --empty
 
+      - name: 🐦 Shorebird Init
+        run: shorebird init --force
+        working-directory: e2e_test
+
         # We need a release before doing a patch
       - name: 🐦 Shorebird Release
-        run: cd e2e_test && shorebird release android --verbose
+        run: shorebird release android --verbose
+        working-directory: e2e_test
 
       - name: 🐦 Shorebird Patch
         uses: ./
