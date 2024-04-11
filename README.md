@@ -35,10 +35,10 @@ The action takes the following inputs:
 - `args`: Any arguments to pass to `shorebird patch`.
   - Use an extra `--` to pass arguments to Flutter (e.g. `-- --dart-define=KEY=VALUE`)
 - `platform`: Which platform to create a release for (e.g. `android` or `ios`)
-- `working-directory`: Which directory to run `shorebird release` in.
+- `working-directory`: Which directory to run `shorebird patch` in.
 
 ## Outputs
 
 The actions outputs the following:
 
-- `release-version`: The version of the release that was successfully created.
+- `patch-number`: The number of the patch that was successfully created.
