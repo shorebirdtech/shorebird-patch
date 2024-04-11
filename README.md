@@ -19,7 +19,7 @@ Create a new release using the [Shorebird CLI](https://github.com/shorebirdtech/
 steps:
   - uses: shorebirdtech/setup-shorebird@v0
   - uses: shorebirdtech/shorebird-patch@v0
-    id: shorebird-release
+    id: shorebird-patch
     with:
       platform: android
       working-directory: ./path/to/app

@@ -1,4 +1,4 @@
-# Releasing Setup Shorebird
+# Releasing Patch Shorebird
 
 These are the steps needed to create a new release:
 
