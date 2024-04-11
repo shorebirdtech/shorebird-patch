@@ -1,0 +1,108 @@
+name: ci
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+  E2E_TEST_SHOREBIRD_YAML: ${{ secrets.E2E_TEST_SHOREBIRD_YAML }}
+
+jobs:
+  semantic-pull-request:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: ☕ Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: 🐦 Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+
+      - name: ✨ Create New Flutter Project
+        run: flutter create e2e_test --empty
+
+      - name: 🐦 Shorebird Init (MacOS/Linux)
+        if: runner.os != 'Windows'
+        run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
+        working-directory: e2e_test
+
+      - name: 🐦 Shorebird Init (Windows)
+        if: runner.os == 'Windows'
+        run: echo $env:E2E_TEST_SHOREBIRD_YAML > shorebird.yaml
+        working-directory: e2e_test
+
+      - name: 🐦 Shorebird Patch pubspec.yaml
+        run: |
+          echo "  assets:" >> pubspec.yaml
+          echo "    - shorebird.yaml" >> pubspec.yaml
+        working-directory: e2e_test
+
+      - name: 🐦 Shorebird Doctor
+        run: shorebird doctor --fix
+        working-directory: e2e_test
+
+      - name: 🐦 Shorebird Patch (MacOS/Linux)
+        if: runner.os != 'Windows'
+        uses: ./
+        id: shorebird-patch-unix
+        with:
+          args: --verbose
+          platform: android
+          working-directory: e2e_test
+
+      - name: 🐦 Shorebird Patch (Windows)
+        if: runner.os == 'Windows'
+        uses: ./
+        id: shorebird-patch-windows
+        with:
+          # We only need allow-asset-diffs on Windows because the release was generated on a
+          # macOS machine, so ignoring asset diffs for now.
+          args: --verbose --allow-asset-diffs
+          platform: android
+          working-directory: e2e_test
+
+      - name: 🚦 Assert Patch Number (MacOS/Linux)
+        if: runner.os != 'Windows'
+        run: |
+          if [[ ${{ steps.shorebird-patch-unix.outputs.patch-number }} =~ ^-?[0-9]+$ ]]; then
+            echo '✅ Shorebird Patch Succeeded!'
+          else
+            echo '❌ Shorebird Patch Failed.'
+            exit 1
+          fi
+
+      - name: 🚦 Assert Patch Version (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if ("${{ steps.shorebird-patch-windows.outputs.patch-number }}" -match "^[0-9]+$") {
+            Write-Output "✅ Shorebird Patch Succeeded!"
+          } else {
+            Write-Output "❌ Shorebird Patch Failed."
+            exit 1
+          }
