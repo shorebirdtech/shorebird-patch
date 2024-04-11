@@ -81,7 +81,7 @@ jobs:
         uses: ./
         id: shorebird-patch-windows
         with:
-          # We only need allow-asset-diffs on Windows because the release were generated on a
+          # We only need allow-asset-diffs on Windows because the release was generated on a
           # macOS machine, so ignoring asset diffs for now.
           args: --verbose --allow-asset-diffs
           platform: android
