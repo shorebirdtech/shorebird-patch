@@ -13,6 +13,7 @@ on:
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
   E2E_TEST_SHOREBIRD_YAML: ${{ secrets.E2E_TEST_SHOREBIRD_YAML }}
+  RELEASE_VERSION: 0.1.0+1
 
 jobs:
   semantic-pull-request:
@@ -47,25 +48,18 @@ jobs:
       - name: ✨ Create New Flutter Project
         run: flutter create e2e_test --empty
 
-      - name: 🐦 Shorebird Init (MacOS/Linux)
-        if: runner.os != 'Windows'
-        run: echo "$E2E_TEST_SHOREBIRD_YAML" > shorebird.yaml
-        working-directory: e2e_test
+      - name: 📝 Adjust Pubspec Version
+        run: "sed -i '' 's/version: 0.1.0/version: ${{ env.RELEASE_VERSION }}/' e2e_test/pubspec.yaml"
 
-      - name: 🐦 Shorebird Init (Windows)
-        if: runner.os == 'Windows'
-        run: echo $env:E2E_TEST_SHOREBIRD_YAML > shorebird.yaml
-        working-directory: e2e_test
-
-      - name: 🐦 Shorebird Patch pubspec.yaml
-        run: |
-          echo "  assets:" >> pubspec.yaml
-          echo "    - shorebird.yaml" >> pubspec.yaml
-        working-directory: e2e_test
-
-      - name: 🐦 Shorebird Doctor
-        run: shorebird doctor --fix
-        working-directory: e2e_test
+      - name: 🐦 Shorebird Release
+        uses: shorebirdtech/shorebird-release@v0
+        id: shorebird-release
+        with:
+          args: --verbose
+          # TODO(felangel): add this when we upgrade to v1.
+          # flutter-version: latest
+          platform: android
+          working-directory: e2e_test
 
       - name: 🐦 Shorebird Patch (MacOS/Linux)
         if: runner.os != 'Windows'
@@ -74,6 +68,7 @@ jobs:
         with:
           args: --verbose
           platform: android
+          release-version: ${{ env.RELEASE_VERSION }}
           working-directory: e2e_test
 
       - name: 🐦 Shorebird Patch (Windows)
@@ -85,6 +80,7 @@ jobs:
           # macOS machine, so ignoring asset diffs for now.
           args: --verbose --allow-asset-diffs
           platform: android
+          release-version: ${{ env.RELEASE_VERSION }}
           working-directory: e2e_test
 
       - name: 🚦 Assert Patch Number (MacOS/Linux)

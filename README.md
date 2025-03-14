@@ -7,9 +7,7 @@ Create a new patch using the [Shorebird CLI](https://github.com/shorebirdtech/sh
 
 ## Features
 
-✅ Create new Android patches
-
-✅ Create new iOS patches
+✅ Create new releases for iOS, Android, macOS, Linux, and Windows
 
 ✅ Outputs the patch number
 
@@ -17,11 +15,12 @@ Create a new patch using the [Shorebird CLI](https://github.com/shorebirdtech/sh
 
 ```yaml
 steps:
-  - uses: shorebirdtech/setup-shorebird@v0
-  - uses: shorebirdtech/shorebird-patch@v0
+  - uses: shorebirdtech/setup-shorebird@v1
+  - uses: shorebirdtech/shorebird-patch@v1
     id: shorebird-patch
     with:
       platform: android
+      release-version: latest
       working-directory: ./path/to/app
 
   - run: echo patch-number ${{ steps.shorebird-patch.outputs.patch-number }}
@@ -35,6 +34,8 @@ The action takes the following inputs:
 - `args`: Any arguments to pass to `shorebird patch`.
   - Use an extra `--` to pass arguments to Flutter (e.g. `-- --dart-define=KEY=VALUE`)
 - `platform`: Which platform to create a patch for (e.g. `android` or `ios`)
+- `release-version`: Which release version to patch.
+  - Use `latest` to target the release that was most recently updated.
 - `working-directory`: Which directory to run `shorebird patch` in.
 
 ## Outputs
