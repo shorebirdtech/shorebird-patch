@@ -49,7 +49,8 @@ jobs:
         run: flutter create e2e_test --empty
 
       - name: 📝 Adjust Pubspec Version
-        run: "sed -i '' 's/version: 0.1.0/version: ${{ env.RELEASE_VERSION }}/' e2e_test/pubspec.yaml"
+        run: |
+          sed -i '' 's/version: 0.1.0/version: ${{ env.RELEASE_VERSION }}/' e2e_test/pubspec.yaml
 
       - name: 🐦 Shorebird Release
         uses: shorebirdtech/shorebird-release@v0
