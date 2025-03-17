@@ -13,6 +13,9 @@ inputs:
   platform:
     description: The platform for which to create a patch (e.g. android, ios)
     required: true
+  release-version:
+    description: The release version to patch (e.g. 1.0.0+1). Use "latest" to target the release that was most recently updated.
+    required: true
   working-directory:
     description: The working directory in which to run Shorebird
     required: false
@@ -31,7 +34,7 @@ runs:
       id: shorebird-patch
       working-directory: ${{ inputs.working-directory }}
       run: |
-        shorebird patch ${{ inputs.platform }} ${{ inputs.args }} | tee output.log
+        shorebird patch ${{ inputs.platform }} --release-version ${{ inputs.release-version }} ${{ inputs.args }} | tee output.log
         GREP_MATCH=$(grep -Ei "Published Patch (.*)" output.log)
         if [[ $GREP_MATCH ]]; then
           # Strip the non-version-number characters from the line
