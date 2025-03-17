@@ -53,12 +53,11 @@ jobs:
         working-directory: e2e_test
 
       - name: 🐦 Shorebird Release
-        uses: shorebirdtech/shorebird-release@v0
+        uses: shorebirdtech/shorebird-release@v1
         id: shorebird-release
         with:
           args: --verbose -- --build-name=${{ env.BUILD_NAME }} --build-number=${{ env.BUILD_NUMBER }}
-          # TODO(felangel): add this when we upgrade to v1.
-          # flutter-version: latest
+          flutter-version: latest
           platform: android
           working-directory: e2e_test
 
