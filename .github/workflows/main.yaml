@@ -49,7 +49,7 @@ jobs:
         run: flutter create e2e_test --empty
 
       - name: 🐦 Shorebird Init
-        run: shorebird init --force
+        run: shorebird init --force --organization-id=14235
         working-directory: e2e_test
 
       - name: 🐦 Shorebird Release
