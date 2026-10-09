@@ -31,7 +31,7 @@ steps:
 
 The action takes the following inputs:
 
-- `args`: Any arguments to pass to `shorebird patch`.
+- `args`: Any arguments to pass to `shorebird patch`. Use YAML `>-` to split them across lines.
   - Use an extra `--` to pass arguments to Flutter (e.g. `-- --dart-define=KEY=VALUE`)
 - `platform`: Which platform to create a patch for (e.g. `android` or `ios`)
 - `release-version`: Which release version to patch.
@@ -42,4 +42,4 @@ The action takes the following inputs:
 
 The actions outputs the following:
 
-- `patch-number`: The number of the patch that was successfully created.
+- `patch-number`: The number of the patch that was successfully created. Empty when `args` includes `--dry-run`.
