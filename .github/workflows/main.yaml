@@ -10,16 +10,121 @@ on:
     branches:
       - main
 
-env:
-  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-  BUILD_NUMBER: 1
-  BUILD_NAME: 0.1.0
+permissions:
+  contents: read
 
 jobs:
   semantic-pull-request:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+    permissions:
+      pull-requests: read
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@61d25935870f12a1f2c23f2a04d5f193c83f4e5d # v1.21.1
+
+  args:
+    # Pins how `args` is split into arguments, using a stub `shorebird` that
+    # records its argv. Must match v1.0.0, which interpolated args directly
+    # into the command line. Also covers --dry-run, which publishes nothing.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        case:
+          - name: plain
+            args: --verbose -- --dart-define=A=b
+            expected: "[patch][android][--release-version][1.0.0+1][--verbose][--][--dart-define=A=b]"
+          - name: double-quoted
+            args: -- --dart-define="A=b"
+            expected: "[patch][android][--release-version][1.0.0+1][--][--dart-define=A=b]"
+          - name: double-quoted-space
+            args: -- --dart-define="A=b c"
+            expected: "[patch][android][--release-version][1.0.0+1][--][--dart-define=A=b c]"
+          - name: single-quoted-space
+            args: -- --dart-define=MSG='hi there'
+            expected: "[patch][android][--release-version][1.0.0+1][--][--dart-define=MSG=hi there]"
+          - name: literal-block
+            args: |
+              --verbose
+              --track=beta
+            expected: "[patch][android][--release-version][1.0.0+1][--verbose][--track=beta]"
+          - name: line-continuation
+            args: |
+              --verbose \
+                --track=beta
+            expected: "[patch][android][--release-version][1.0.0+1][--verbose][--track=beta]"
+          - name: empty
+            args: ""
+            expected: "[patch][android][--release-version][1.0.0+1]"
+          - name: unset-variable
+            args: -- --dart-define=A=$SHOREBIRD_UNSET_TEST_VAR
+            expected: "[patch][android][--release-version][1.0.0+1][--][--dart-define=A=]"
+          - name: dry-run-grouped
+            args: -vn
+            expected: "[patch][android][--release-version][1.0.0+1][-vn]"
+            dry-run: true
+          - name: dry-run
+            args: --dry-run
+            expected: "[patch][android][--release-version][1.0.0+1][--dry-run]"
+            dry-run: true
+
+    name: args (${{ matrix.case.name }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🪶 Stub Shorebird
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/stub"
+          cat > "$RUNNER_TEMP/stub/shorebird" <<'STUB'
+          #!/usr/bin/env bash
+          printf '[%s]' "$@" > "$RUNNER_TEMP/argv.txt"
+          for arg in "$@"; do
+            [[ "$arg" == "--dry-run" || "$arg" == "-vn" ]] && { echo "No issues detected."; exit 0; }
+          done
+          echo "✅ Published Patch 3!"
+          STUB
+          chmod +x "$RUNNER_TEMP/stub/shorebird"
+          echo "$RUNNER_TEMP/stub" >> "$GITHUB_PATH"
+
+      - name: 🐦 Shorebird Patch
+        uses: $/
+        id: shorebird-patch
+        with:
+          args: ${{ matrix.case.args }}
+          platform: android
+          release-version: 1.0.0+1
+
+      - name: 🚦 Assert Arguments
+        shell: bash
+        env:
+          EXPECTED: ${{ matrix.case.expected }}
+          PATCH_NUMBER: ${{ steps.shorebird-patch.outputs.patch-number }}
+          DRY_RUN: ${{ matrix.case.dry-run == true }}
+        run: |
+          actual="$(cat "$RUNNER_TEMP/argv.txt")"
+          echo "expected: $EXPECTED"
+          echo "actual:   $actual"
+          [[ "$actual" == "$EXPECTED" ]]
+          expected_number="3"
+          if [[ "$DRY_RUN" == true ]]; then expected_number=""; fi
+          [[ "$PATCH_NUMBER" == "$expected_number" ]]
+
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 🔒 zizmor
+        run: pipx run zizmor==1.30.1 --offline --config .github/zizmor.yml .
 
   e2e:
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      BUILD_NUMBER: 1
+      BUILD_NAME: 0.1.0
     strategy:
       fail-fast: false
       matrix:
@@ -28,16 +133,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: 🎯 Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           cache: true
 
       - name: ☕ Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: "temurin"
           java-version: "17"
@@ -68,7 +175,7 @@ jobs:
 
       - name: 🐦 Shorebird Patch (MacOS/Linux)
         if: runner.os != 'Windows'
-        uses: ./
+        uses: $/
         id: shorebird-patch-unix
         with:
           args: --verbose
@@ -78,7 +185,7 @@ jobs:
 
       - name: 🐦 Shorebird Patch (Windows)
         if: runner.os == 'Windows'
-        uses: ./
+        uses: $/
         id: shorebird-patch-windows
         with:
           # We only need allow-asset-diffs on Windows because the release was generated on a
@@ -88,22 +195,14 @@ jobs:
           release-version: "${{ env.BUILD_NAME }}+${{ env.BUILD_NUMBER }}"
           working-directory: e2e_test
 
-      - name: 🚦 Assert Patch Number (MacOS/Linux)
-        if: runner.os != 'Windows'
+      - name: 🚦 Assert Patch Number
+        shell: bash
+        env:
+          PATCH_NUMBER: ${{ steps.shorebird-patch-unix.outputs.patch-number || steps.shorebird-patch-windows.outputs.patch-number }}
         run: |
-          if [[ ${{ steps.shorebird-patch-unix.outputs.patch-number }} =~ ^-?[0-9]+$ ]]; then
+          if [[ "$PATCH_NUMBER" =~ ^[0-9]+$ ]]; then
             echo '✅ Shorebird Patch Succeeded!'
           else
-            echo '❌ Shorebird Patch Failed.'
+            echo "❌ Shorebird Patch Failed (patch-number: '$PATCH_NUMBER')."
             exit 1
           fi
-
-      - name: 🚦 Assert Patch Version (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          if ("${{ steps.shorebird-patch-windows.outputs.patch-number }}" -match "^[0-9]+$") {
-            Write-Output "✅ Shorebird Patch Succeeded!"
-          } else {
-            Write-Output "❌ Shorebird Patch Failed."
-            exit 1
-          }
