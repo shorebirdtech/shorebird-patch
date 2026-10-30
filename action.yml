@@ -16,6 +16,10 @@ inputs:
   release-version:
     description: The release version to patch (e.g. 1.0.0+1). Use "latest" to target the release that was most recently updated.
     required: true
+  track:
+    description: The track to publish the patch to (e.g. stable, beta, staging). Empty leaves it to the CLI.
+    required: false
+    default: ""
   working-directory:
     description: The working directory in which to run Shorebird
     required: false
@@ -37,6 +41,7 @@ runs:
         SHOREBIRD_ACTION_ARGS: ${{ inputs.args }}
         SHOREBIRD_ACTION_PLATFORM: ${{ inputs.platform }}
         SHOREBIRD_ACTION_RELEASE_VERSION: ${{ inputs.release-version }}
+        SHOREBIRD_ACTION_TRACK: ${{ inputs.track }}
       run: |
         # No `set -u`: args may reference unset variables, which expand to
         # empty as they did in v1.0.0.
@@ -54,6 +59,11 @@ runs:
         SHOREBIRD_ACTION_ARGS="${SHOREBIRD_ACTION_ARGS//"$SHOREBIRD_ACTION_CONTINUATION"/ }"
         SHOREBIRD_ACTION_ARGS="${SHOREBIRD_ACTION_ARGS//$'\n'/ }"
         eval "set -- $SHOREBIRD_ACTION_ARGS"
+
+        # Passed before args, so a --track in args still wins.
+        if [[ -n "$SHOREBIRD_ACTION_TRACK" ]]; then
+          set -- --track "$SHOREBIRD_ACTION_TRACK" "$@"
+        fi
 
         # --dry-run validates without publishing, so there's no patch number
         # to report. Flags after `--` go to Flutter, not shorebird.
