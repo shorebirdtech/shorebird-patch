@@ -38,7 +38,7 @@ The action takes the following inputs:
 - `release-version`: Which release version to patch.
   - Use `latest` to target the release that was most recently updated.
 - `track`: Which track to publish the patch to (e.g. `stable`, `beta`, `staging`, or a track you created).
-  - Leave it empty to let the Shorebird CLI decide. Newer CLIs no longer default to `stable` when they can't ask, so set it in CI.
+  - Leave it empty to let the Shorebird CLI decide. The CLI is moving away from defaulting to `stable` when it can't ask, so set it in CI.
 - `working-directory`: Which directory to run `shorebird patch` in.
 
 ## Outputs
