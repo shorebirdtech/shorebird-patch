@@ -21,6 +21,7 @@ steps:
     with:
       platform: android
       release-version: latest
+      track: stable
       working-directory: ./path/to/app
 
   - run: echo patch-number ${{ steps.shorebird-patch.outputs.patch-number }}
@@ -36,6 +37,8 @@ The action takes the following inputs:
 - `platform`: Which platform to create a patch for (e.g. `android` or `ios`)
 - `release-version`: Which release version to patch.
   - Use `latest` to target the release that was most recently updated.
+- `track`: Which track to publish the patch to (e.g. `stable`, `beta`, `staging`, or a track you created).
+  - Leave it empty to let the Shorebird CLI decide. The CLI is moving away from defaulting to `stable` when it can't ask, so set it in CI.
 - `working-directory`: Which directory to run `shorebird patch` in.
 
 ## Outputs

@@ -45,6 +45,14 @@ jobs:
               --verbose \
                 --track=beta
             expected: "[patch][android][--release-version][1.0.0+1][--verbose][--track=beta]"
+          - name: track
+            args: --verbose
+            track: stable
+            expected: "[patch][android][--release-version][1.0.0+1][--track][stable][--verbose]"
+          - name: track-and-args
+            args: --track=beta
+            track: stable
+            expected: "[patch][android][--release-version][1.0.0+1][--track][stable][--track=beta]"
           - name: empty
             args: ""
             expected: "[patch][android][--release-version][1.0.0+1]"
@@ -88,6 +96,7 @@ jobs:
         id: shorebird-patch
         with:
           args: ${{ matrix.case.args }}
+          track: ${{ matrix.case.track }}
           platform: android
           release-version: 1.0.0+1
 
@@ -183,6 +192,7 @@ jobs:
           args: --verbose
           platform: android
           release-version: "${{ env.BUILD_NAME }}+${{ env.BUILD_NUMBER }}"
+          track: stable
           working-directory: e2e_test
 
       - name: 🐦 Shorebird Patch (Windows)
@@ -195,6 +205,7 @@ jobs:
           args: --verbose --allow-asset-diffs
           platform: android
           release-version: "${{ env.BUILD_NAME }}+${{ env.BUILD_NUMBER }}"
+          track: stable
           working-directory: e2e_test
 
       - name: 🚦 Assert Patch Number

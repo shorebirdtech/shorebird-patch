@@ -4,13 +4,13 @@ Users reference this action as `@v1`, a tag we move to each new v1.x.y. Moving i
 
 ## Maintenance
 
-This action is in maintenance mode. It's a thin wrapper around the [Shorebird CLI](https://github.com/shorebirdtech/shorebird), which any workflow can also run directly, so it isn't getting new features or a v2. It is kept working: CI stays green and [zizmor](https://github.com/zizmorcore/zizmor)-clean, real bugs get fixed, and fixes get released rather than left on `main`.
+This action is in maintenance mode. It's a thin wrapper around the [Shorebird CLI](https://github.com/shorebirdtech/shorebird), which any workflow can also run directly, so it isn't getting new features or a v2. The exception is an input that keeps `@v1` workflows working through a CLI change, such as `track` for the CLI dropping its default track. It is kept working: CI stays green and [zizmor](https://github.com/zizmorcore/zizmor)-clean, real bugs get fixed, and fixes get released rather than left on `main`.
 
 A fix must not change behavior that existing `@v1` workflows rely on. That includes how `args` is split and expanded: workflows pass things like `$HOME/...` in `args`, so shell expansion there has to keep working. The `args` job in `.github/workflows/main.yaml` pins that behavior to v1.0.0's; a change that needs one of its expected values changed breaks `@v1` workflows.
 
 ## Steps
 
-`vX.Y.Z` below is the new version: the last release with its patch number bumped. Releases are patch bumps, since only fixes are released.
+`vX.Y.Z` below is the new version: the last release with its patch number bumped. Releases are patch bumps for fixes, and minor bumps when they add an input.
 
 1. Confirm the `ci` workflow is green on the `main` commit you are releasing. No other Shorebird action uses this one, so its own e2e there is the downstream check.
 1. Tag that commit, and check the tag points at the commit CI passed on:
