@@ -156,7 +156,7 @@ jobs:
           java-version: "17"
 
       - name: 🐦 Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
+        uses: shorebirdtech/setup-shorebird@8b1059ddb56a926f0146edf4133cc647775c162f # v1.4.1
 
       - name: ✨ Create New Flutter Project
         # With the Flutter that `shorebird release` builds with, not the newest
@@ -176,7 +176,7 @@ jobs:
         working-directory: e2e_test
 
       - name: 🐦 Shorebird Release
-        uses: shorebirdtech/shorebird-release@v1
+        uses: shorebirdtech/shorebird-release@8605c991e8f513451c775ae3909984e9476748a2 # v1.0.1
         id: shorebird-release
         with:
           args: --verbose -- --build-name=${{ env.BUILD_NAME }} --build-number=${{ env.BUILD_NUMBER }}
