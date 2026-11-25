@@ -162,9 +162,10 @@ jobs:
         # With the Flutter that `shorebird release` builds with, not the newest
         # stable: when stable moves ahead of Shorebird's latest Flutter, a
         # project created by stable needs a Dart SDK Shorebird can't build with.
-        # The CLI installs that Flutter only when a command needs it
-        # (shorebird#4527), so precache it first, then ask the CLI where it is
-        # instead of building the path from its cache layout.
+        # Since Shorebird 1.6.149 that Flutter is installed only when a command
+        # needs it (shorebird#4527, shorebird#4529), so precache it first, then
+        # ask the CLI where it is instead of building the path from its cache
+        # layout.
         shell: bash
         run: |
           shorebird flutter precache
