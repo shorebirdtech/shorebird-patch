@@ -162,11 +162,17 @@ jobs:
         # With the Flutter that `shorebird release` builds with, not the newest
         # stable: when stable moves ahead of Shorebird's latest Flutter, a
         # project created by stable needs a Dart SDK Shorebird can't build with.
+        # The CLI installs that Flutter only when a command needs it
+        # (shorebird#4527), so precache it first, then ask the CLI where it is
+        # instead of building the path from its cache layout.
         shell: bash
         run: |
-          SHOREBIRD_BIN="$(dirname "$(command -v shorebird)")"
-          FLUTTER_REVISION="$(cat "$SHOREBIRD_BIN/internal/flutter.version")"
-          "$SHOREBIRD_BIN/cache/flutter/$FLUTTER_REVISION/bin/flutter" create e2e_test --empty
+          shorebird flutter precache
+          FLUTTER_DIR="$(shorebird flutter path | tail -n 1 | tr -d '\r')"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            FLUTTER_DIR="$(cygpath -u "$FLUTTER_DIR")"
+          fi
+          "$FLUTTER_DIR/bin/flutter" create e2e_test --empty
 
       - name: 🐦 Shorebird Init
         # Mints a new app in the project on every run; the last step deletes
